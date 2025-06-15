@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -18,13 +16,63 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #ffffff;
     --foreground: #ededed;
   }
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background-color);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+
+
+  --font-h1: var(--regular) var(--text-h1-r) / normal var(--font-family);
+  --font-h2: var(--regular) var(--text-h2-r) / normal var(--font-family);
+  --font-h3: var(--regular) var(--text-h3-r) / normal var(--font-family);
+  --font-h4: var(--regular) var(--text-h4-r) / normal var(--font-family);
+  --font-h5: var(--regular) var(--text-h5-r) / normal var(--font-family);
+  --font-h6: var(--regular) var(--text-h6-r) / normal var(--font-family);
+  --font-p: var(--regular) var(--text-p-r) / normal var(--font-family);
+  --font-s: var(--regular) var(--text-s-r) / normal var(--font-family);
 }
+
+h1,
+.h1 {
+  font: var(--font-h1);
+}
+
+h2,
+.h2 {
+  font: var(--font-h2);
+}
+
+h3,
+.h3 {
+  font: var(--font-h3);
+}
+
+h4,
+.h4 {
+  font: var(--font-h4);
+}
+
+h5,
+.h5 {
+  font: var(--font-h5);
+}
+
+h6,
+.h6 {
+  font: var(--font-h6);
+}
+
+p,
+.p {
+  font: var(--font-p);
+}
+
+.s {
+  font: var(--font-s);
+}
+
