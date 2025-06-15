@@ -3,21 +3,19 @@ import { ExaSearchResult } from '@/common/types';
 import { NextRequest } from 'next/server';
 
 function shouldExpand(item: ExaSearchResult): boolean {
-  if (typeof item.score === 'number') {
-    return item.score >= 0.32;
-  }
-
+  const hasMinScore = typeof item.score !== 'number' || item.score >= 0.32;
   const hasGoodTitle = item.title && item.title.length > 10;
   const hasSummary = item.summary && item.summary.length > 30;
   const hasAuthor = item.author && item.author.trim().length > 0;
 
   let score = 0;
 
+  if (hasMinScore) score++;
   if (hasGoodTitle) score++;
   if (hasSummary) score++;
   if (hasAuthor) score++;
 
-  return score >= 2;
+  return score >= 3; // At least 3 out of 4 criteria must be met
 }
 
 export async function POST(req: NextRequest) {

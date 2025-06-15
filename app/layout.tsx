@@ -1,4 +1,6 @@
-import '../styles/globals.css';
+import '@/styles/globals.css';
+import '@/styles/variables.css';
+import 'animate.css';
 import { ReactNode } from 'react';
 
 export const metadata = {
