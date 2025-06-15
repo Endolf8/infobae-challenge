@@ -10,3 +10,5 @@ export const HTTP_STATUS = {
   conflict: 409,
   internalServerError: 500,
 };
+
+export const basePath = process.env.basePath ?? '';
