@@ -17,7 +17,7 @@
   --colors-neutrals-n2: #bfbfbf;
   --colors-neutrals-n3: #808080;
   --colors-neutrals-n4: #595959;
-  --colors-palette-p1: #039e82;
+  --colors-palette-p1: #124e30;
   --colors-palette-p1-25: #039e8240;
   --colors-palette-p1-50: #c082ff;
   --colors-palette-p2: #ffff1e;
@@ -33,7 +33,6 @@
   --spacing-xl: 1.5625rem;
   --spacing-2xl: 1.875rem;
   --spacing-3xl: 2.1875rem;
-
 }
 
 :root {
@@ -61,5 +60,5 @@
   --elevation-e3: 0px 2px 8px rgba(0, 0, 0, 0.25);
   --elevation-e4: 0px 0px 15px rgba(0, 0, 0, 0.3);
   --elevation-colored: 0px 0px 0px 4px rgba(132, 10, 255, 0.25);
-  --elavation-inset:  '0px 2px 2px 0px rgba(0, 0, 0, 0.25), 0px 7px 20px 0px rgba(0, 0, 0, 0.25) inset'
+  --elavation-inset: '0px 2px 2px 0px rgba(0, 0, 0, 0.25), 0px 7px 20px 0px rgba(0, 0, 0, 0.25) inset';
 }

@@ -2,29 +2,34 @@ import { ExaSearchResult } from '../types';
 
 interface Result<T> {
   ok: boolean;
-  data: T | null;
+  data: {
+    expand: T | null;
+    noExpand: T | null;
+  } | null;
 }
 
 interface ISearchServices {
-  search: (query: string) => Promise<Result<ExaSearchResult[]>>;
+  search: (
+    query: string,
+    category: string | null
+  ) => Promise<Result<ExaSearchResult[]>>;
 }
 
 const SearchServices: ISearchServices = {
-  search: async (query: string) => {
+  search: async (query: string, category) => {
     const res = await fetch('/api/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         query,
-        includeDomain: null,
-        category: null,
+        category: category,
       }),
     });
 
     const data = await res.json();
     return {
       ok: res.ok,
-      data: data.results || null,
+      data: data || null,
     };
   },
 };
