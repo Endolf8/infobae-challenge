@@ -1,67 +1,69 @@
-import ResultCard from '@/common/components/ResultCard';
-import SearchServices from '@/common/services/SearchServices';
-import { ExaSearchResult } from '@/common/types';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
+import ResultList from '@/common/components/ResultList/ResultList';
+import SearchServices from '@/common/services/SearchServices';
+import { CategoryType, ExaSearchResult } from '@/common/types';
+import SearchBar from '@/common/components/SearchBar';
 
 const HomeView = () => {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<ExaSearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [category, setCategory] = useState<CategoryType | null>(null);
+  const [results, setResults] = useState<{
+    expand: ExaSearchResult[] | null;
+    noExpand: ExaSearchResult[] | null;
+  }>({
+    expand: [],
+    noExpand: [],
+  });
+  const [isLoading, setIsLoading] = useState(false);
   const [notResultsFinder, setNotResultsFinder] = useState(false);
-  ///TODO: Implement notResultsFinder state to show a message when no results are found
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setResults([]);
-    const { ok, data } = await SearchServices.search(query);
+  const performSearch = async () => {
+    if (!query) return;
+    setIsLoading(true);
+    setNotResultsFinder(false);
+    setResults({ expand: [], noExpand: [] });
 
-    if (!ok || !data) {
-      setResults([]);
-      setLoading(false);
+    const { ok, data } = await SearchServices.search(query, category);
+
+    if (!ok || (!data?.expand && !data?.noExpand)) {
+      setIsLoading(false);
       return;
     }
-    if (data.length > 0) {
+
+    if (data) {
       setResults(data);
     } else {
-      setResults([]);
       setNotResultsFinder(true);
     }
 
-    setLoading(false);
+    setIsLoading(false);
   };
 
-  return (
-    <div className="flex flex-col mx-auto py-12 px-4 max-w-screen">
-      <h1 className="text-2xl font-semibold mb-4">🧠 Exa Research Tool</h1>
-      <form onSubmit={handleSearch} className="flex gap-2 mb-6">
-        <input
-          type="text"
-          className="flex-1 border p-2 text-black rounded"
-          placeholder="Escribí un tema para investigar..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <button
-          className="bg-blue-600 text-white px-4 rounded"
-          type="submit"
-          disabled={loading}
-        >
-          {loading ? 'Buscando...' : 'Buscar'}
-        </button>
-      </form>
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await performSearch();
+  };
+  useEffect(() => {
+    performSearch();
+  }, [category]);
 
-      {/* ///TODO: move list to components */}
-      <div className=" grid-cols-3 gap-4  grid flex-1">
-        {results.map((r, index) => (
-          <div
-            key={index}
-            className="col-span-1   h-full w-full animate__animated animate__fadeIn"
-          >
-            <ResultCard result={r} />
-          </div>
-        ))}
+  return (
+    <div className="flex flex-col bg-stone-n7 mx-auto py-12 px-16 h-screen max-w-screen gap-4 ">
+      <SearchBar
+        category={category}
+        handleSearch={handleSearch}
+        query={query}
+        setQuery={setQuery}
+        setCategory={setCategory}
+      />
+      <div className="h-full w-full">
+        <ResultList
+          isLoading={isLoading}
+          results={results}
+          query={query}
+          notResultsFinder={notResultsFinder}
+        />
       </div>
     </div>
   );

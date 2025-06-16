@@ -29,3 +29,5 @@ export interface ExaSearchResult {
     [key: string]: any;
   };
 }
+
+export type CategoryType = 'research paper' | 'news' | 'pdf';

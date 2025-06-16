@@ -51,7 +51,7 @@ const Button = ({
   };
 
   const baseStyles =
-    'font-bold rounded-[0.625rem] h-15 px-6 py-3 flex items-center justify-center gap-2 cursor-pointer border-none transition-transform duration-100 active:scale-90 disabled:cursor-not-allowed disabled:grayscale';
+    ' rounded-[0.625rem] h-15 px-6 py-3 flex items-center justify-center gap-2 cursor-pointer border-none transition-transform duration-100 active:scale-90 disabled:cursor-not-allowed disabled:grayscale';
 
   const sizeStyles: Record<Size, string> = {
     tiny: 'px-4 py-0 text-sm w-max',
@@ -64,7 +64,7 @@ const Button = ({
 
   const variantStyles = secondary
     ? 'bg-[var(--colors-neutrals-n1)] text-[var(--colors-primary-p1)]'
-    : 'bg-[var(--colors-primary-p2)] text-[var(--colors-primary-p1)]';
+    : 'bg-p1 text-n0';
 
   return (
     <button
