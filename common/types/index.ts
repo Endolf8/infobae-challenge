@@ -31,3 +31,14 @@ export interface ExaSearchResult {
 }
 
 export type CategoryType = 'research paper' | 'news' | 'pdf';
+
+export interface ExaContent {
+  id: string;
+  title: string;
+  url: string;
+  publishedDate: string;
+  author: string;
+  text: string;
+  image: string;
+  favicon: string;
+}
