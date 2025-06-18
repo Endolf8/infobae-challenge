@@ -1,6 +1,5 @@
 import { Result } from './types';
 
-// services/ArticleServices.ts
 interface GenerateInput {
   title: string;
   text: string;
