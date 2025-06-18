@@ -1,19 +1,24 @@
+'use client';
+
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import Card from '../Card';
 import { ExaSearchResult } from '@/common/types';
 import Img from '../Img';
-import { Globe } from 'lucide-react';
+import { Globe, Pencil } from 'lucide-react';
+import Button from '../Button';
 
 interface ResultCardProps {
   result: ExaSearchResult;
 }
 const ResultCard = ({ result }: ResultCardProps) => {
+  const router = useRouter();
   return (
     <Card
       rounded="m"
       shadow="e3"
-      padding="xl"
-      className="!h-full w-full text-n10  relative overflow-hidden animate__animated animate__fadeIn animate__slow"
+      padding="l"
+      className="!h-full w-full text-n10  relative overflow-hidden animate__animated animate__fadeIn animate__slow !pb-4 "
     >
       <a
         className="flex absolute top-0 gap-2 bg-n0 right-0 w-fit shadow-e1 border  items-center px-1 animate__animated  animate__slideInRight  animate__fast cursor-pointer"
@@ -39,7 +44,7 @@ const ResultCard = ({ result }: ResultCardProps) => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <h2 className="text-lg font-semibold  line-clamp-2 hover:text-p1 cursor-pointer ">
+          <h2 className="text-lg font-semibold pr-4 line-clamp-2 hover:text-p1 cursor-pointer ">
             {result.title}
           </h2>
         </a>
@@ -51,6 +56,19 @@ const ResultCard = ({ result }: ResultCardProps) => {
           -{result.author ? ` Autor: ${result.author}` : ' Autor no disponible'}
         </p>
         <p className="text-base mb-2">{result.summary}</p>
+      </div>
+      <div className="w-full flex justify-end  flex-1  items-center text-p1">
+        <Button
+          className="!w-fit"
+          onClick={() => {
+            router.push(`/generator?url=${result.url}`);
+          }}
+        >
+          <span className="flex items-center gap-2">
+            <span>Crear</span>
+            <Pencil className=" w-4 h-4 text-n7 font-normal" />
+          </span>
+        </Button>
       </div>
     </Card>
   );
