@@ -13,7 +13,7 @@ const LABEL_STYLE = {
 const ABSOLUTE_CHILDREN_STYLE = 'gap-xs';
 
 const INPUT_STYLE = {
-  base: 'text-sm rounded-sm border-n1 px-md py-sm placeholder:text-n4 text-n4', // TIP: For only bottom border use: 'rounded-none border-0 border-b'
+  base: 'text-sm rounded-sm border-n2 px-md py-sm placeholder:text-n4 text-n4', // TIP: For only bottom border use: 'rounded-none border-0 border-b'
   hover: 'hover:border-n4',
   focus: cn(styles.inputFocus, 'focus:border-p1 focus:shadow-colored'),
   disabled: 'disabled:text-n3 disabled:border-n4 disabled:bg-n1',

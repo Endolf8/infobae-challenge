@@ -32,6 +32,7 @@ const TitleGenerator = ({
       );
       return;
     }
+    setGeneratedTitles([]);
     setIsGenerating(true);
     const response = await fetch('/api/generateTitles', {
       method: 'POST',
@@ -53,7 +54,6 @@ const TitleGenerator = ({
       setTitleCount(value === '' ? null : Number(value));
     }
   };
-
   return (
     <div className="w-full flex flex-col h-full ">
       <div className="px-6">
@@ -99,11 +99,11 @@ const TitleGenerator = ({
           {generatedTitles.map((t, index) => (
             <li key={index}>
               <button
-                onClick={() => setCustomTitle(title)}
+                onClick={() => setCustomTitle(t)}
                 className="w-full flex text-left text-sm  gap-2 hover:text-p1 "
               >
                 <SunDim className={'h-7 w-7'} />
-                {title}
+                {t}
               </button>
             </li>
           ))}
@@ -122,7 +122,7 @@ const TitleGenerator = ({
           onChange={(e) => handleTitleChange(e.target.value)}
           placeholder={title}
           rows={4}
-          className="w-full rounded-md px-4 text-sm bg-n0 focus:outline-none focus:ring-1 resize-none focus:shadow-e4 focus:ring-n-p1 border border-p1"
+          className="w-full rounded-md py-2 px-4 text-sm bg-n0 focus:outline-none focus:ring-1 resize-none focus:shadow-e4 focus:ring-n-p1 border border-p1"
         />
         <div className="flex w-full justify-end">
           <Button

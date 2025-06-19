@@ -17,6 +17,7 @@ import Img from '@/common/components/Img';
 import infobaeLogo from '@/public/assets/Infobae-logo.svg';
 import { modifyTitle } from '@/common/utils/modifyTitle';
 import SourcesSelector from '@/common/components/SourcesSelector';
+import { getArticleHtml } from '@/common/utils/getArticleHtml';
 
 const GeneratorView = () => {
   const searchParams = useSearchParams();
@@ -31,7 +32,7 @@ const GeneratorView = () => {
   const [generatedTitles, setGeneratedTitles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const getContent = async () => {
+  const getContent = async (url: string) => {
     if (!url) return;
     setContent(null);
 
@@ -124,7 +125,6 @@ const GeneratorView = () => {
       setGenerado((prev) => prev + chunk);
     }
   };
-
   const getElementSidebar = () => {
     switch (elementSeletected) {
       case 'sources':
@@ -132,6 +132,7 @@ const GeneratorView = () => {
           <SourcesSelector
             handleGenerateFromImage={handleGenerateFromImage}
             isLoading={isLoading}
+            getContent={getContent}
           />
         );
       case 'titles':
@@ -161,9 +162,28 @@ const GeneratorView = () => {
 
   useEffect(() => {
     if (url && !content) {
-      getContent();
+      getContent(url);
     }
   }, [url]);
+
+  const handleDownloadPDF = async () => {
+    const htmlContent = getArticleHtml(generado);
+
+    const container = document.createElement('div');
+    container.innerHTML = htmlContent;
+
+    const html2pdf = (await import('html2pdf.js')).default;
+    html2pdf()
+      .from(container)
+      .set({
+        margin: 10,
+        filename: 'articulo-generado.pdf',
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] },
+      })
+      .save();
+  };
 
   return (
     <main className="flex w-screen h-screen relative overflow-hidden bg-n1">
@@ -175,7 +195,7 @@ const GeneratorView = () => {
               : SIDEBAR_ELEMENTS
           }
           onClickElement={(key) => {
-            if (!url) return;
+            if (!url && !content) return;
             setElementSeletected(key);
           }}
           elementSeletected={elementSeletected}
@@ -183,6 +203,14 @@ const GeneratorView = () => {
         <ElementSidebar>{getElementSidebar()}</ElementSidebar>
       </div>
       <div className="  flex flex-col items-center mx-auto  pt-4 flex-1 ">
+        {generado && (
+          <button
+            onClick={handleDownloadPDF}
+            className="px-4 py-2 !bg-p1 text-n10 absolute bottom-6 right-6 z-modal rounded hover:bg-n8 shadow-e3"
+          >
+            Descargar como PDF
+          </button>
+        )}
         {generado ? (
           <div className="bg-n0  p-6 max-w-3xl gap-4  flex flex-col flex-1 rounded-t-md shadow-e1 overflow-y-auto">
             <Img
@@ -192,7 +220,7 @@ const GeneratorView = () => {
             />
 
             {generado && (
-              <article className="font-serif space-y-3 ">
+              <article className="font-serif space-y-3">
                 {formatArticle(generado)}
               </article>
             )}

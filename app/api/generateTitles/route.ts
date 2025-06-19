@@ -25,12 +25,19 @@ export async function POST(req: NextRequest) {
 
     // Crear el prompt que incluye instrucciones claras
     const prompt = `
-      Eres un editor profesional de contenido. Aquí tienes el contexto de un artículo:
-      ${contentText}
+Eres un editor profesional de contenido. Aquí tienes el contexto de un artículo:
+${contentText}
 
-      Tu tarea es generar títulos atractivos, claros y concisos para este artículo. Los títulos deben resumir el tema del artículo y captar la atención de los lectores.
-      Por favor, genera ${count} títulos diferentes para este artículo, asegurándote de que sean breves y al punto.
-    `;
+Tu tarea es generar títulos atractivos, claros y concisos para este artículo. Los títulos deben resumir el tema del artículo y captar la atención de los lectores.
+
+⚠️ Importante: 
+- NO repitas el título original ni ninguna de sus versiones textuales.
+- Cada título generado debe ser único y diferente entre sí.
+- Evita sinónimos directos o reformulaciones triviales del original.
+- Usa creatividad para encontrar ángulos nuevos o enfoques distintos sobre el mismo contenido.
+
+Por favor, genera ${count} títulos únicos y breves para este artículo, manteniendo un tono profesional y orientado al lector.
+`;
 
     // Llamada a generateObject para obtener títulos
     const { object } = await generateObject({

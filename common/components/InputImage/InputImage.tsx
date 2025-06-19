@@ -37,7 +37,8 @@ export default function InputImage({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md  flex flex-col gap-2 mx-auto">
+      <label>Subir imagen</label>
       <div
         className="border-2 border-dashed border-gray-300 hover:border-p1 rounded-lg p-2 transition-colors cursor-pointer"
         onClick={triggerFileInput}
