@@ -49,7 +49,8 @@ export async function POST(req: NextRequest) {
   const noExpand: ExaSearchResult[] = [];
 
   data.results.forEach((item: ExaSearchResult) => {
-    shouldExpand(item) ? expand.push(item) : noExpand.push(item);
+    if (shouldExpand(item)) expand.push(item);
+    else noExpand.push(item);
   });
 
   return new Response(JSON.stringify({ expand, noExpand }), {

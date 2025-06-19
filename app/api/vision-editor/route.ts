@@ -1,6 +1,7 @@
 import { streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import type { CoreMessage } from 'ai';
+import * as formidable from 'formidable';
 import { HTTP_STATUS } from '@/common/constants';
 
 export const maxDuration = 30;
@@ -8,7 +9,7 @@ export const maxDuration = 30;
 const systemPrompt = `
 Actuás como un redactor profesional de medios digitales, especializado en noticias para audiencias amplias.
 
-Tu tarea es redactar un artículo periodístico claro, preciso y bien estructurado a partir del contenido proporcionado por el usuario.
+Tu tarea es redactar un artículo periodístico claro, preciso y bien estructurado a partir de la imagen proporcionada por el usuario.
 
 Debés generar siempre:
 
@@ -28,9 +29,9 @@ Pautas:
 - Usá frases cortas, párrafos de no más de 4 líneas.
 - El texto debe estar redactado desde cero, pero basado en el contenido que se te entrega como referencia.
 - Evitá adjetivos innecesarios y mantené un tono profesional.
--  Nunca incluyas frases que revelen que el texto fue generado por una IA o que sugieran futuras acciones, como: "esto podría expandirse", "podemos desarrollar más", "si querés profundizar", "como modelo de lenguaje", etc.
+- Nunca incluyas frases que revelen que el texto fue generado por una IA o que sugieran futuras acciones, como: "esto podría expandirse", "podemos desarrollar más", "si querés profundizar", "como modelo de lenguaje", etc.
 - No incluyas instrucciones o comentarios sobre el proceso de redacción.
-- No repitas el contenido original palabra por palabra, sino que lo sintetizás y lo reescribís con tus propias palabras.
+- No describas la imagen literalmente, sino que lo interprétala y escribe a partir de la imagen con tus propias palabras.
 
 Siempre entregá la respuesta en el formato indicado.`;
 
@@ -39,39 +40,64 @@ const systemMessage: CoreMessage = {
   content: systemPrompt,
 };
 
-function buildMessages(
-  title: string,
-  text: string,
-  history: string[] = []
-): CoreMessage[] {
+function buildMessages(base64Image: string): CoreMessage[] {
   const userMessage: CoreMessage = {
     role: 'user',
-    content: `
-    Título sugerido: ${title}
-    Contenido base:${text}`,
+    content: [
+      {
+        type: 'image',
+        image: `data:image/jpeg;base64,${base64Image}`,
+      },
+    ],
   };
-  const historyMessages: CoreMessage[] = history.map((entry) => ({
-    role: 'user',
-    content: entry,
-  }));
 
-  return [systemMessage, userMessage, ...historyMessages];
+  return [systemMessage, userMessage];
 }
+
+type ParsedFile = Partial<formidable.File> & { buffer: Buffer };
+
+const parseForm = async (req: Request): Promise<{ files: ParsedFile[] }> => {
+  const formData = await req.formData();
+  const imageFile = formData.get('image') as File;
+
+  if (!imageFile) {
+    throw new Error('No image file provided');
+  }
+
+  const fileBuffer = await imageFile.arrayBuffer();
+  const fileData = Buffer.from(fileBuffer);
+
+  const files: ParsedFile[] = [
+    {
+      originalFilename: imageFile.name,
+      mimetype: imageFile.type,
+      size: fileData.length,
+      buffer: fileData,
+    },
+  ];
+
+  return { files };
+};
 
 export async function POST(req: Request) {
   try {
-    const { title, text, history = [] } = await req.json();
+    const { files } = await parseForm(req);
 
-    if (!title || !text) {
+    const imageFile = Array.isArray(files) ? files[0] : files;
+
+    if (!imageFile) {
       return new Response(JSON.stringify({ error: 'Faltan datos' }), {
-        status: HTTP_STATUS.notFound,
+        status: HTTP_STATUS.badRequest,
       });
     }
 
-    const messages = buildMessages(title, text, history);
+    const imageBuffer = imageFile.buffer;
+    const base64Image = imageBuffer.toString('base64');
+
+    const messages = buildMessages(base64Image);
 
     const result = await streamText({
-      model: openai('gpt-4.1-nano'),
+      model: openai('gpt-4.1-mini'),
       messages,
     });
 

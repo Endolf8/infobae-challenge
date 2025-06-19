@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ titles }, { status: HTTP_STATUS.ok });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error);
     return NextResponse.json(
       { error: 'Error al generar los títulos' },

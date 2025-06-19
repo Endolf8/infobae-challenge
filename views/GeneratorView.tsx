@@ -15,6 +15,8 @@ import EditorAssistantPanel from '@/common/components/EditorAssistantPanel/Edito
 import Loading from '@/common/components/Loading';
 import Img from '@/common/components/Img';
 import infobaeLogo from '@/public/assets/Infobae-logo.svg';
+import { modifyTitle } from '@/common/utils/modifyTitle';
+import SourcesSelector from '@/common/components/SourcesSelector';
 
 const GeneratorView = () => {
   const searchParams = useSearchParams();
@@ -27,34 +29,7 @@ const GeneratorView = () => {
     url ? 'titles' : 'sources'
   );
   const [generatedTitles, setGeneratedTitles] = useState<string[]>([]);
-
-  const modifyTitle = (generado: string, newTitle: string) => {
-    const titlePattern = '**Title:';
-    const subtitlePattern = '**Subtitle:';
-    const bodyPattern = '**Body:';
-
-    const lines = generado.split('\n').filter((line) => line.trim() !== '');
-
-    let title = newTitle;
-    let subtitle = '';
-    let body = '';
-
-    lines.forEach((line) => {
-      if (line.startsWith(titlePattern)) {
-        title = newTitle;
-      } else if (line.startsWith(subtitlePattern)) {
-        subtitle = line.replace(subtitlePattern, '').replace('**', '').trim();
-      } else if (line.startsWith(bodyPattern)) {
-        body += line.replace(bodyPattern, '').replace('**', '').trim() + '\n';
-      } else {
-        body += line + '\n';
-      }
-    });
-
-    setGenerado(
-      `**Title:** ${title}\n**Subtitle:** ${subtitle}\n**Body:**\n${body}`
-    );
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
   const getContent = async () => {
     if (!url) return;
@@ -84,6 +59,8 @@ const GeneratorView = () => {
     history: string[];
   }) => {
     setGenerado('');
+    setIsLoading(true);
+
     const { ok, data } = await ArticleServices.requestStream({
       title,
       text,
@@ -104,6 +81,7 @@ const GeneratorView = () => {
       const chunk = decoder.decode(value, { stream: true });
       setGenerado((prev) => prev + chunk);
     }
+    setIsLoading(false);
   };
 
   const handlePromptSubmit = async () => {
@@ -124,9 +102,38 @@ const GeneratorView = () => {
     });
   };
 
+  const handleGenerateFromImage = async (image: File) => {
+    setGenerado('');
+    setIsLoading(true);
+
+    const { ok, data } = await ArticleServices.requestStreamFromImage(image);
+    setIsLoading(false);
+
+    if (!ok || !data) {
+      // TODO: Manejar error
+      return;
+    }
+
+    const reader = data.getReader();
+    const decoder = new TextDecoder('utf-8');
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      setGenerado((prev) => prev + chunk);
+    }
+  };
+
   const getElementSidebar = () => {
-    if (!content) return null;
     switch (elementSeletected) {
+      case 'sources':
+        return (
+          <SourcesSelector
+            handleGenerateFromImage={handleGenerateFromImage}
+            isLoading={isLoading}
+          />
+        );
       case 'titles':
         return (
           <TitleGenerator
@@ -134,7 +141,7 @@ const GeneratorView = () => {
             contentText={getTextContent(generado)}
             setGeneratedTitles={setGeneratedTitles}
             generatedTitles={generatedTitles}
-            handleSaveCustomTitle={(e) => modifyTitle(generado, e)}
+            handleSaveCustomTitle={(e) => setGenerado(modifyTitle(generado, e))}
           />
         );
       case 'editor':
@@ -168,6 +175,7 @@ const GeneratorView = () => {
               : SIDEBAR_ELEMENTS
           }
           onClickElement={(key) => {
+            if (!url) return;
             setElementSeletected(key);
           }}
           elementSeletected={elementSeletected}
@@ -188,6 +196,13 @@ const GeneratorView = () => {
                 {formatArticle(generado)}
               </article>
             )}
+          </div>
+        ) : !url ? (
+          <div className="flex items-center justify-center flex-col flex-1">
+            <Img src={infobaeLogo} alt="Infobae Logo" className="h-36" />
+            <p className="text-h4 text-n10 text-center">
+              Descubrí lo que vale la pena investigar.
+            </p>
           </div>
         ) : (
           <Loading title="Redactando" />

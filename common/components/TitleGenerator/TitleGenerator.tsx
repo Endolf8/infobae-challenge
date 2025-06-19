@@ -1,11 +1,10 @@
 'use client';
-
 import React, { useState } from 'react';
 import Button from '../Button';
 import Img from '../Img';
 import starWhiteIcon from '@/public/assets/icon-star-white.svg';
 import cn from '@/common/utils/classNames';
-import { Star, StarHalf, StarIcon, SunDim } from 'lucide-react';
+import { SunDim } from 'lucide-react';
 
 interface TitleGeneratorProps {
   contentText: string;
@@ -40,11 +39,10 @@ const TitleGenerator = ({
       headers: { 'Content-Type': 'application/json' },
     });
     const data = await response.json();
-    setGeneratedTitles(data.titles); // Suponiendo que la API devuelve un array de títulos
+    setGeneratedTitles(data.titles);
     setIsGenerating(false);
   };
 
-  // Previsualización del título
   const handleTitleChange = (title: string) => {
     setCustomTitle(title);
   };
@@ -52,8 +50,7 @@ const TitleGenerator = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || !isNaN(Number(value))) {
-      // Permitir borrar completamente o ingresar números
-      setTitleCount(value === '' ? null : Number(value)); // Establecer el valor como número o null
+      setTitleCount(value === '' ? null : Number(value));
     }
   };
 

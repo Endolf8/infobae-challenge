@@ -79,7 +79,7 @@ const HomeView = () => {
         </div>
         <div
           className={`transition-all duration-500 ease-out transform ${
-            firstSearch ? 'w-8/12 translate-y-0' : 'w-full'
+            firstSearch ? 'w-8/12 translate-y-0' : 'w-full px-1'
           }`}
         >
           <SearchBar
