@@ -17,7 +17,7 @@ export const getArticleHtml = (text: string): string => {
       }
 
       if (line.startsWith('**Body:**')) {
-        return ''; // omit label
+        return '';
       }
 
       return `<p style="font-size: 14px; line-height: 1.6; margin-bottom: 12px;">${line}</p>`;

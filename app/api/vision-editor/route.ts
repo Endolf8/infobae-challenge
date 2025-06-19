@@ -97,7 +97,7 @@ export async function POST(req: Request) {
     const messages = buildMessages(base64Image);
 
     const result = await streamText({
-      model: openai('gpt-4.1-mini'),
+      model: openai('gpt-4o'),
       messages,
     });
 

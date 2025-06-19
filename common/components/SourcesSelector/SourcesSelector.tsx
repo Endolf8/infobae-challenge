@@ -49,7 +49,7 @@ const SourcesSelector = ({
 
       <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto mt-4">
         <Input
-          label="Url"
+          label="URL"
           name="url"
           value={url}
           handleChange={(_, value) => setUrl(value)}

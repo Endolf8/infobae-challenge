@@ -2,6 +2,8 @@ import { HTTP_STATUS } from '@/common/constants';
 import { ExaSearchResult } from '@/common/types';
 import { NextRequest } from 'next/server';
 
+const NUMBER_MIN_CRITERIA = 3;
+
 function shouldExpand(item: ExaSearchResult): boolean {
   const hasMinScore = typeof item.score !== 'number' || item.score >= 0.25;
   const hasGoodTitle = item.title && item.title.length > 10;
@@ -15,7 +17,8 @@ function shouldExpand(item: ExaSearchResult): boolean {
   if (hasSummary) score++;
   if (hasAuthor) score++;
 
-  return score >= 3; // At least 3 out of 4 criteria must be met
+  // At least 3 out of 4 criteria must be met
+  return score >= NUMBER_MIN_CRITERIA;
 }
 
 export async function POST(req: NextRequest) {

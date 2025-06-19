@@ -14,16 +14,16 @@ import { getTextContent } from '@/common/utils/getTextContent';
 import EditorAssistantPanel from '@/common/components/EditorAssistantPanel/EditorAssistantPanel';
 import Loading from '@/common/components/Loading';
 import Img from '@/common/components/Img';
-import infobaeLogo from '@/public/assets/Infobae-logo.svg';
 import { modifyTitle } from '@/common/utils/modifyTitle';
 import SourcesSelector from '@/common/components/SourcesSelector';
 import { getArticleHtml } from '@/common/utils/getArticleHtml';
+import infobaeLogo from '@/public/assets/Infobae-logo.svg';
 
 const GeneratorView = () => {
   const searchParams = useSearchParams();
   const url = searchParams.get('url');
   const [content, setContent] = useState<ExaContent | null>(null);
-  const [generado, setGenerado] = useState('');
+  const [contentGenerated, setContentGenerated] = useState('');
   const [customPrompt, setCustomPrompt] = useState('');
   const [history, setHistory] = useState<string[]>([]);
   const [elementSeletected, setElementSeletected] = useState<ElementsProps>(
@@ -59,7 +59,7 @@ const GeneratorView = () => {
     text: string;
     history: string[];
   }) => {
-    setGenerado('');
+    setContentGenerated('');
     setIsLoading(true);
 
     const { ok, data } = await ArticleServices.requestStream({
@@ -80,31 +80,31 @@ const GeneratorView = () => {
       const { done, value } = await reader.read();
       if (done) break;
       const chunk = decoder.decode(value, { stream: true });
-      setGenerado((prev) => prev + chunk);
+      setContentGenerated((prev) => prev + chunk);
     }
     setIsLoading(false);
   };
 
   const handlePromptSubmit = async () => {
-    if (!generado || !customPrompt.trim()) return;
+    if (!contentGenerated || !customPrompt.trim()) return;
 
-    const nuevaHistoria = [...history, customPrompt.trim()];
-    setHistory(nuevaHistoria);
+    const newHistory = [...history, customPrompt.trim()];
+    setHistory(newHistory);
     setCustomPrompt('');
 
-    let title = getTitle(generado);
-    let body = getTextContent(generado);
+    let title = getTitle(contentGenerated);
+    let body = getTextContent(contentGenerated);
 
     const nuevoTexto = `**Title:** ${title}\n**Body:**\n${body}`;
     await handleGenerate({
       title: title,
       text: nuevoTexto,
-      history: nuevaHistoria,
+      history: newHistory,
     });
   };
 
   const handleGenerateFromImage = async (image: File) => {
-    setGenerado('');
+    setContentGenerated('');
     setIsLoading(true);
 
     const { ok, data } = await ArticleServices.requestStreamFromImage(image);
@@ -122,9 +122,10 @@ const GeneratorView = () => {
       const { done, value } = await reader.read();
       if (done) break;
       const chunk = decoder.decode(value, { stream: true });
-      setGenerado((prev) => prev + chunk);
+      setContentGenerated((prev) => prev + chunk);
     }
   };
+
   const getElementSidebar = () => {
     switch (elementSeletected) {
       case 'sources':
@@ -138,11 +139,13 @@ const GeneratorView = () => {
       case 'titles':
         return (
           <TitleGenerator
-            title={getTitle(generado)}
-            contentText={getTextContent(generado)}
+            title={getTitle(contentGenerated)}
+            contentText={getTextContent(contentGenerated)}
             setGeneratedTitles={setGeneratedTitles}
             generatedTitles={generatedTitles}
-            handleSaveCustomTitle={(e) => setGenerado(modifyTitle(generado, e))}
+            handleSaveCustomTitle={(e) =>
+              setContentGenerated(modifyTitle(contentGenerated, e))
+            }
           />
         );
       case 'editor':
@@ -167,7 +170,7 @@ const GeneratorView = () => {
   }, [url]);
 
   const handleDownloadPDF = async () => {
-    const htmlContent = getArticleHtml(generado);
+    const htmlContent = getArticleHtml(contentGenerated);
 
     const container = document.createElement('div');
     container.innerHTML = htmlContent;
@@ -203,7 +206,7 @@ const GeneratorView = () => {
         <ElementSidebar>{getElementSidebar()}</ElementSidebar>
       </div>
       <div className="  flex flex-col items-center mx-auto  pt-4 flex-1 ">
-        {generado && (
+        {contentGenerated && (
           <button
             onClick={handleDownloadPDF}
             className="px-4 py-2 !bg-p1 text-n10 absolute bottom-6 right-6 z-modal rounded hover:bg-n8 shadow-e3"
@@ -211,7 +214,7 @@ const GeneratorView = () => {
             Descargar como PDF
           </button>
         )}
-        {generado ? (
+        {contentGenerated ? (
           <div className="bg-n0  p-6 max-w-3xl gap-4  flex flex-col flex-1 rounded-t-md shadow-e1 overflow-y-auto">
             <Img
               src={infobaeLogo}
@@ -219,9 +222,9 @@ const GeneratorView = () => {
               className="h-4 ml-[-5.5rem]"
             />
 
-            {generado && (
+            {contentGenerated && (
               <article className="font-serif space-y-3">
-                {formatArticle(generado)}
+                {formatArticle(contentGenerated)}
               </article>
             )}
           </div>

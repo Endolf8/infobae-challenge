@@ -11,13 +11,11 @@ export const getTextContent = (text: string) => {
     if (line.startsWith(subtitlePattern)) {
       subtitle = line.replace(subtitlePattern, '').replace('**', '').trim();
     } else if (line.startsWith(bodyPattern)) {
-      // El contenido del cuerpo comienza después de '**Body:'
       body += line.replace(bodyPattern, '').replace('**', '').trim() + '\n';
     } else {
-      body += line + '\n'; // Para las líneas que no tengan formato especial
+      body += line + '\n';
     }
   });
 
-  // Regresamos el subtítulo y el cuerpo, sin el título
   return `**Subtitle:** ${subtitle}\n**Body:**\n${body}`;
 };
