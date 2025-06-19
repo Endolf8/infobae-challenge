@@ -78,7 +78,7 @@ const HomeView = () => {
           </p>
         </div>
         <div
-          className={`transition-all duration-500 ease-out transform ${
+          className={`transition-all duration-500 z-modal ease-out transform ${
             firstSearch ? 'w-8/12 translate-y-0' : 'w-full px-1'
           }`}
         >
@@ -90,7 +90,7 @@ const HomeView = () => {
             setCategory={setCategory}
           />
         </div>
-        <div className="h-full w-full">
+        <div className="h-full w-full !z-0">
           <ResultList
             isLoading={isLoading}
             results={results}

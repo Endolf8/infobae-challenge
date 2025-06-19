@@ -34,8 +34,8 @@ const ResultList = ({
   };
 
   return (
-    <div className="w-full pb-8">
-      <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[1fr]">
+    <div className="w-full pb-8 !z-20">
+      <div className="grid grid-cols-3  !z-20 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[1fr]">
         {isLoading ? (
           <div className="col-span-full flex justify-center py-8">
             <Loading title="Buscando resultados..." />
@@ -48,7 +48,7 @@ const ResultList = ({
           results.expand?.map((r, index) => (
             <div
               key={index}
-              className="h-full animate__animated animate__fadeIn flex"
+              className="h-full  animate__animated animate__fadeIn flex"
             >
               <ResultCard result={r} />
             </div>

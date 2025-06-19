@@ -1,40 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+README.md
 
-## Getting Started
+# Infobae Challenge - Herramienta de Investigación con IA
 
-First, run the development server:
+Este proyecto es una aplicación Next.js que integra el SDK de IA de Vercel con la API de Exa para proporcionar funcionalidades de investigación automatizada para creadores de contenido. La herramienta ayuda a los usuarios a iniciar investigaciones sobre temas específicos, categorizar resultados y generar contenido basado en esos hallazgos asistido por IA.
 
-```bash
+## Despliegue
+
+La aplicación se despliega automáticamente en Vercel y puede accederse en [https://infobae-challenge-iota.vercel.app](https://infobae-challenge-iota.vercel.app/).
+
+## Funcionalidades
+
+1. **Página de Investigación**: Navegá a la página principal e ingresá una consulta de investigación personalizada en la barra de búsqueda. Elegí el tipo de investigación que deseas realizar para obtener resultados más relevantes.
+2. **Ver Resultados**: Examiná los resultados de investigación categorizados y elegí un tema que te interese. Podés leer el artículo original para chequear si vale la pena expandirlo.
+3. **Expandir Contenido**: Hacé clic en "Expandir" para cualquier tema que valga la pena para generar un borrador de artículo basado en los resultados de investigación. La herramienta generará un artículo inicial automáticamente utilizando la API de Exa y OpenAI.
+4. **Generación por URL/Imagen**: alternativamente también podés usar [el generador](https://infobae-challenge-iota.vercel.app) (haciendo click en el ícono de crear) para subir una imagen o URL de tu elección para generar un artículo basado en ese contenido.
+5. **Generación de Títulos**: podés generar títulos para tu artículo utilizando la funcionalidad de generación de títulos. Podés elegir entre un número de títulos sugeridos y seleccionar el que más te guste o modificarlo según tus necesidades.
+6. **Editar Contenido**: usá el asistente de IA para editar el contenido generado, refinando el artículo según tus preferencias.
+7. **Exportar Artículo**: una vez que estés satisfecho con el artículo, podés exportarlo en formato PDF para compartirlo.
+
+## Ejecutar el Proyecto
+
+### Prerequisitos
+
+- Node.js (v18 o más reciente)
+- npm o yarn
+- API Keys para Exa y OpenAI
+
+### Servidor Local
+
+1. Instalar dependencias:
+
+bash
+npm install
+
+# o
+
+yarn install
+
+2. Crear un archivo `.env.local` en el directorio raíz completando las siguientes variables:
+
+EXA_API_KEY=exa_api_key
+OPENAI_API_KEY=openai_api_key
+
+3. Ejecutar el servidor de desarrollo:
+
+bash
 npm run dev
-# or
+
+# o
+
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Abrir [http://localhost:3000](http://localhost:3000) en tu navegador para ver la aplicación.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+### Build de Producción
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+Para compilar la aplicación para producción:
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+bash
+npm run build
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# o
 
-## Learn More
+yarn build
 
-To learn more about Next.js, take a look at the following resources:
+Para iniciar el servidor de producción:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+bash
+npm start
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# o
 
-## Deploy on Vercel
+yarn start
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Stack Tecnológico
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+- **Frontend**: Next.js + TypeScript
+- **Estilos**: Tailwind CSS
+- **Integración API**: Vercel AI SDK, Exa API, OpenAI API
+- **Despliegue**: Vercel
+
+## Mejoras Futuras
+
+- Implementar autenticación de usuarios para investigación personalizada
+- Añadir funcionalidad de guardado, exportación y publicación de resultados de investigación
+- Mejorar el algoritmo de categorización con criterios más personalizados
+- Añadir características colaborativas para creación de contenido en equipo
+- Implementar analíticas de contenido para rastrear el rendimiento de los artículos generados

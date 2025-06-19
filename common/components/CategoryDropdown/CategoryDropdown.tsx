@@ -32,7 +32,7 @@ const CategoryDropdown: React.FC<Props> = ({ selected, onSelect }) => {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="relative inline-block text-left">
+    <div className="relative inline-block text-left z-modal">
       <button
         onClick={() => setOpen((prev) => !prev)}
         type="button"
@@ -46,7 +46,7 @@ const CategoryDropdown: React.FC<Props> = ({ selected, onSelect }) => {
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-2 w-44 left-[-2rem] overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5">
+        <div className="absolute animate__animated animate__fadeIn animate__fast mt-2 w-44 left-[-6rem] animate z-modal overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5">
           <div className="py-1">
             {CATEGORIES.map((cat) => {
               const isSelected = selected === cat.key;

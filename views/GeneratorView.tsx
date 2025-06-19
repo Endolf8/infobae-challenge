@@ -23,7 +23,7 @@ const GeneratorView = () => {
   const searchParams = useSearchParams();
   const url = searchParams.get('url');
   const [content, setContent] = useState<ExaContent | null>(null);
-  const [contentGenerated, setContentGenerated] = useState('');
+  const [generatedContent, setGeneratedContent] = useState('');
   const [customPrompt, setCustomPrompt] = useState('');
   const [history, setHistory] = useState<string[]>([]);
   const [elementSeletected, setElementSeletected] = useState<ElementsProps>(
@@ -59,7 +59,7 @@ const GeneratorView = () => {
     text: string;
     history: string[];
   }) => {
-    setContentGenerated('');
+    setGeneratedContent('');
     setIsLoading(true);
 
     const { ok, data } = await ArticleServices.requestStream({
@@ -80,20 +80,20 @@ const GeneratorView = () => {
       const { done, value } = await reader.read();
       if (done) break;
       const chunk = decoder.decode(value, { stream: true });
-      setContentGenerated((prev) => prev + chunk);
+      setGeneratedContent((prev) => prev + chunk);
     }
     setIsLoading(false);
   };
 
   const handlePromptSubmit = async () => {
-    if (!contentGenerated || !customPrompt.trim()) return;
+    if (!generatedContent || !customPrompt.trim()) return;
 
     const newHistory = [...history, customPrompt.trim()];
     setHistory(newHistory);
     setCustomPrompt('');
 
-    let title = getTitle(contentGenerated);
-    let body = getTextContent(contentGenerated);
+    let title = getTitle(generatedContent);
+    let body = getTextContent(generatedContent);
 
     const nuevoTexto = `**Title:** ${title}\n**Body:**\n${body}`;
     await handleGenerate({
@@ -104,7 +104,7 @@ const GeneratorView = () => {
   };
 
   const handleGenerateFromImage = async (image: File) => {
-    setContentGenerated('');
+    setGeneratedContent('');
     setIsLoading(true);
 
     const { ok, data } = await ArticleServices.requestStreamFromImage(image);
@@ -122,7 +122,7 @@ const GeneratorView = () => {
       const { done, value } = await reader.read();
       if (done) break;
       const chunk = decoder.decode(value, { stream: true });
-      setContentGenerated((prev) => prev + chunk);
+      setGeneratedContent((prev) => prev + chunk);
     }
   };
 
@@ -139,12 +139,12 @@ const GeneratorView = () => {
       case 'titles':
         return (
           <TitleGenerator
-            title={getTitle(contentGenerated)}
-            contentText={getTextContent(contentGenerated)}
+            title={getTitle(generatedContent)}
+            contentText={getTextContent(generatedContent)}
             setGeneratedTitles={setGeneratedTitles}
             generatedTitles={generatedTitles}
             handleSaveCustomTitle={(e) =>
-              setContentGenerated(modifyTitle(contentGenerated, e))
+              setGeneratedContent(modifyTitle(generatedContent, e))
             }
           />
         );
@@ -170,7 +170,7 @@ const GeneratorView = () => {
   }, [url]);
 
   const handleDownloadPDF = async () => {
-    const htmlContent = getArticleHtml(contentGenerated);
+    const htmlContent = getArticleHtml(generatedContent);
 
     const container = document.createElement('div');
     container.innerHTML = htmlContent;
@@ -198,7 +198,7 @@ const GeneratorView = () => {
               : SIDEBAR_ELEMENTS
           }
           onClickElement={(key) => {
-            if (!url && !content) return;
+            if (!url && !content && !generatedContent) return;
             setElementSeletected(key);
           }}
           elementSeletected={elementSeletected}
@@ -206,7 +206,7 @@ const GeneratorView = () => {
         <ElementSidebar>{getElementSidebar()}</ElementSidebar>
       </div>
       <div className="  flex flex-col items-center mx-auto  pt-4 flex-1 ">
-        {contentGenerated && (
+        {generatedContent && (
           <button
             onClick={handleDownloadPDF}
             className="px-4 py-2 !bg-p1 text-n10 absolute bottom-6 right-6 z-modal rounded hover:bg-n8 shadow-e3"
@@ -214,7 +214,7 @@ const GeneratorView = () => {
             Descargar como PDF
           </button>
         )}
-        {contentGenerated ? (
+        {generatedContent ? (
           <div className="bg-n0  p-6 max-w-3xl gap-4  flex flex-col flex-1 rounded-t-md shadow-e1 overflow-y-auto">
             <Img
               src={infobaeLogo}
@@ -222,9 +222,9 @@ const GeneratorView = () => {
               className="h-4 ml-[-5.5rem]"
             />
 
-            {contentGenerated && (
+            {generatedContent && (
               <article className="font-serif space-y-3">
-                {formatArticle(contentGenerated)}
+                {formatArticle(generatedContent)}
               </article>
             )}
           </div>
