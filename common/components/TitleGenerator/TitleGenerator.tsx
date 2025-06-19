@@ -5,6 +5,7 @@ import Button from '../Button';
 import Img from '../Img';
 import starWhiteIcon from '@/public/assets/icon-star-white.svg';
 import cn from '@/common/utils/classNames';
+import { Star, StarHalf, StarIcon, SunDim } from 'lucide-react';
 
 interface TitleGeneratorProps {
   contentText: string;
@@ -17,13 +18,13 @@ const TitleGenerator = ({
   title,
   handleSaveCustomTitle,
 }: TitleGeneratorProps) => {
-  const [titleCount, setTitleCount] = useState<number | null>(null);
+  const [titleCount, setTitleCount] = useState<number | null>(3);
   const [customTitle, setCustomTitle] = useState<string>('');
   const [generatedTitles, setGeneratedTitles] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
 
   const generateTitles = async () => {
-    if (!contentText || (titleCount && titleCount < 1)) {
+    if (!contentText || (titleCount && titleCount < 1) || !titleCount) {
       alert(
         'Por favor, proporciona el texto del contenido y una cantidad válida de títulos.'
       );
@@ -54,8 +55,8 @@ const TitleGenerator = ({
   };
 
   return (
-    <div className="w-full px-6 flex flex-col h-full ">
-      <div>
+    <div className="w-full flex flex-col h-full ">
+      <div className="px-6">
         <h2 className="text-xl font-semibold mb-6">Generación de Títulos</h2>
         <label
           htmlFor="titleCount"
@@ -91,7 +92,7 @@ const TitleGenerator = ({
       </div>
 
       {/* Títulos Generados */}
-      <div className="flex-1 overflow-y-auto py-4 ">
+      <div className="flex-1 overflow-y-auto p-4 ">
         {generatedTitles.length > 0 && !isGenerating && (
           <h3 className=" font-medium text-gray-800 mb-2">
             Títulos Generados:
@@ -102,8 +103,9 @@ const TitleGenerator = ({
             <li key={index}>
               <button
                 onClick={() => setCustomTitle(title)}
-                className="w-full text-left text-sm font-semibold hover:text-p1"
+                className="w-full flex text-left text-sm  hover:text-p1 "
               >
+                <SunDim className="h-6 w-6" />
                 {title}
               </button>
             </li>
@@ -111,23 +113,26 @@ const TitleGenerator = ({
         </ul>
       </div>
 
-      <div className="bg-sharp-gradient ">
-        <div className="bg-n0 p-2 flex flex-col gap-4 border-t border-gray-200 !bg-sharp-gradient ">
-          <h3 className="text-lg font-medium text-n10">Título:</h3>
-          <textarea
-            value={customTitle}
-            onChange={(e) => handleTitleChange(e.target.value)}
-            placeholder={title}
-            rows={4}
-            className="w-full border border-gray-300 rounded-md px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+      <div className="p-3 flex flex-col gap-4  bg-sharp-gradient ">
+        <label
+          htmlFor="prompt"
+          className="block px-2 text-n10 font-medium text-sm"
+        >
+          Título:
+        </label>
+        <textarea
+          value={customTitle}
+          onChange={(e) => handleTitleChange(e.target.value)}
+          placeholder={title}
+          rows={4}
+          className="w-full rounded-md px-4 text-sm bg-n0 focus:outline-none focus:ring-1 resize-none focus:shadow-e4 focus:ring-n-p1 border border-p1"
+        />
+        <div className="flex w-full justify-end">
+          <Button
+            handleClick={() => handleSaveCustomTitle(customTitle)}
+            label="Guardar"
+            className="!w-fit !bg-n0 text-p1"
           />
-          <div className="flex w-full justify-end">
-            <Button
-              handleClick={() => handleSaveCustomTitle(customTitle)}
-              label="Guardar"
-              className="!w-fit"
-            />
-          </div>
         </div>
       </div>
     </div>
