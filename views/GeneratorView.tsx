@@ -1,27 +1,44 @@
 'use client';
-import ArticleServices from '@/common/services/ArticleServices';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import ContentServices from '@/common/services/ContentServices';
 import { ExaContent } from '@/common/types';
+import ArticleServices from '@/common/services/ArticleServices';
+import TitleGenerator from '@/common/components/TitleGenerator';
+import MainSidebar from '@/common/components/MainSidebar';
+import ElementSidebar from '@/common/components/ElementSidebar';
 import { formatArticle } from '@/common/utils/formatArticle';
-import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { ElementsProps, SIDEBAR_ELEMENTS } from '@/common/constants/generator';
+import { getTitle } from '@/common/utils/getTitle';
+import { getTextContent } from '@/common/utils/getTextContent';
+import EditorAssistantPanel from '@/common/components/EditorAssistantPanel/EditorAssistantPanel';
+import Loading from '@/common/components/Loading';
+import Img from '@/common/components/Img';
+import { modifyTitle } from '@/common/utils/modifyTitle';
+import SourcesSelector from '@/common/components/SourcesSelector';
+import { getArticleHtml } from '@/common/utils/getArticleHtml';
+import infobaeLogo from '@/public/assets/Infobae-logo.svg';
 
 const GeneratorView = () => {
   const searchParams = useSearchParams();
   const url = searchParams.get('url');
   const [content, setContent] = useState<ExaContent | null>(null);
-  const [generado, setGenerado] = useState('');
+  const [contentGenerated, setContentGenerated] = useState('');
   const [customPrompt, setCustomPrompt] = useState('');
   const [history, setHistory] = useState<string[]>([]);
-  const [isComplete, setIsComplete] = useState(false);
+  const [elementSeletected, setElementSeletected] = useState<ElementsProps>(
+    url ? 'titles' : 'sources'
+  );
+  const [generatedTitles, setGeneratedTitles] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const getContent = async () => {
+  const getContent = async (url: string) => {
     if (!url) return;
     setContent(null);
 
     const { ok, data } = await ContentServices.getContent(url);
     if (!ok || !data) {
-      ///TODO: Handle error case
+      // TODO: Manejar caso de error
       return;
     }
 
@@ -42,8 +59,8 @@ const GeneratorView = () => {
     text: string;
     history: string[];
   }) => {
-    setIsComplete(false);
-    setGenerado('');
+    setContentGenerated('');
+    setIsLoading(true);
 
     const { ok, data } = await ArticleServices.requestStream({
       title,
@@ -52,6 +69,8 @@ const GeneratorView = () => {
     });
 
     if (!ok || !data) {
+      // TODO: Manejar error
+      return;
     }
 
     const reader = data.getReader();
@@ -61,61 +80,165 @@ const GeneratorView = () => {
       const { done, value } = await reader.read();
       if (done) break;
       const chunk = decoder.decode(value, { stream: true });
-      setGenerado((prev) => prev + chunk);
+      setContentGenerated((prev) => prev + chunk);
     }
-
-    setIsComplete(true);
+    setIsLoading(false);
   };
 
   const handlePromptSubmit = async () => {
-    if (!content || !customPrompt.trim()) return;
-    const nuevaHistoria = [...history, customPrompt.trim()];
-    setHistory(nuevaHistoria);
+    if (!contentGenerated || !customPrompt.trim()) return;
+
+    const newHistory = [...history, customPrompt.trim()];
+    setHistory(newHistory);
     setCustomPrompt('');
+
+    let title = getTitle(contentGenerated);
+    let body = getTextContent(contentGenerated);
+
+    const nuevoTexto = `**Title:** ${title}\n**Body:**\n${body}`;
     await handleGenerate({
-      title: content.title,
-      text: content.text,
-      history: nuevaHistoria,
+      title: title,
+      text: nuevoTexto,
+      history: newHistory,
     });
+  };
+
+  const handleGenerateFromImage = async (image: File) => {
+    setContentGenerated('');
+    setIsLoading(true);
+
+    const { ok, data } = await ArticleServices.requestStreamFromImage(image);
+    setIsLoading(false);
+
+    if (!ok || !data) {
+      // TODO: Manejar error
+      return;
+    }
+
+    const reader = data.getReader();
+    const decoder = new TextDecoder('utf-8');
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      setContentGenerated((prev) => prev + chunk);
+    }
+  };
+
+  const getElementSidebar = () => {
+    switch (elementSeletected) {
+      case 'sources':
+        return (
+          <SourcesSelector
+            handleGenerateFromImage={handleGenerateFromImage}
+            isLoading={isLoading}
+            getContent={getContent}
+          />
+        );
+      case 'titles':
+        return (
+          <TitleGenerator
+            title={getTitle(contentGenerated)}
+            contentText={getTextContent(contentGenerated)}
+            setGeneratedTitles={setGeneratedTitles}
+            generatedTitles={generatedTitles}
+            handleSaveCustomTitle={(e) =>
+              setContentGenerated(modifyTitle(contentGenerated, e))
+            }
+          />
+        );
+      case 'editor':
+        return (
+          <EditorAssistantPanel
+            customPrompt={customPrompt}
+            history={history}
+            setCustomPrompt={setCustomPrompt}
+            handlePromptSubmit={handlePromptSubmit}
+          />
+        );
+
+      default:
+        return <div className="p-4">Selecciona una opción del menú</div>;
+    }
   };
 
   useEffect(() => {
     if (url && !content) {
-      getContent();
+      getContent(url);
     }
   }, [url]);
 
-  return (
-    <main className="p-6 max-w-3xl mx-auto relative">
-      <h3 className="text-xl font-bold mb-4">
-        {new Date().toLocaleDateString('es-AR')}
-      </h3>
-      {generado && (
-        <article className="font-serif space-y-3">
-          {formatArticle(generado)}
-        </article>
-      )}
+  const handleDownloadPDF = async () => {
+    const htmlContent = getArticleHtml(contentGenerated);
 
-      {generado && isComplete && (
-        <div className="fixed bottom-6 right-6 w-full max-w-md p-4 bg-white border shadow-xl rounded-lg z-50 animate__animated animate__slideInRight">
-          <label className="block mb-2 font-medium text-sm">
-            ¿Querés hacer un cambio?
-          </label>
-          <input
-            type="text"
-            placeholder="Ej: Redactalo en tono más informal"
-            className="w-full border px-3 py-2 rounded mb-2 text-sm"
-            value={customPrompt}
-            onChange={(e) => setCustomPrompt(e.target.value)}
-          />
+    const container = document.createElement('div');
+    container.innerHTML = htmlContent;
+
+    const html2pdf = (await import('html2pdf.js')).default;
+    html2pdf()
+      .from(container)
+      .set({
+        margin: 10,
+        filename: 'articulo-generado.pdf',
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] },
+      })
+      .save();
+  };
+
+  return (
+    <main className="flex w-screen h-screen relative overflow-hidden bg-n1">
+      <div className="flex">
+        <MainSidebar
+          elements={
+            url
+              ? SIDEBAR_ELEMENTS.filter((e) => e.key !== 'sources')
+              : SIDEBAR_ELEMENTS
+          }
+          onClickElement={(key) => {
+            if (!url && !content) return;
+            setElementSeletected(key);
+          }}
+          elementSeletected={elementSeletected}
+        />
+        <ElementSidebar>{getElementSidebar()}</ElementSidebar>
+      </div>
+      <div className="  flex flex-col items-center mx-auto  pt-4 flex-1 ">
+        {contentGenerated && (
           <button
-            onClick={handlePromptSubmit}
-            className="bg-black text-white text-sm px-4 py-2 rounded"
+            onClick={handleDownloadPDF}
+            className="px-4 py-2 !bg-p1 text-n10 absolute bottom-6 right-6 z-modal rounded hover:bg-n8 shadow-e3"
           >
-            Reescribir con AI
+            Descargar como PDF
           </button>
-        </div>
-      )}
+        )}
+        {contentGenerated ? (
+          <div className="bg-n0  p-6 max-w-3xl gap-4  flex flex-col flex-1 rounded-t-md shadow-e1 overflow-y-auto">
+            <Img
+              src={infobaeLogo}
+              alt="Infobae Logo"
+              className="h-4 ml-[-5.5rem]"
+            />
+
+            {contentGenerated && (
+              <article className="font-serif space-y-3">
+                {formatArticle(contentGenerated)}
+              </article>
+            )}
+          </div>
+        ) : !url ? (
+          <div className="flex items-center justify-center flex-col flex-1">
+            <Img src={infobaeLogo} alt="Infobae Logo" className="h-36" />
+            <p className="text-h4 text-n10 text-center">
+              Descubrí lo que vale la pena investigar.
+            </p>
+          </div>
+        ) : (
+          <Loading title="Redactando" />
+        )}
+      </div>
     </main>
   );
 };

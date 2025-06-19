@@ -10,8 +10,6 @@ interface ImgProps extends ImageProps {
 const Img = ({ src, alt, ref, Fallback, ...props }: ImgProps) => {
   const [hasError, setHasError] = useState(false);
 
-  console.log(hasError);
-
   if (hasError || !src) {
     return Fallback;
   }

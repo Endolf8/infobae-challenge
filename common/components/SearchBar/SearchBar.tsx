@@ -35,23 +35,25 @@ const SearchBar: React.FC<SearchBarProps> = ({
           </div>
           <input
             type="text"
-            className="flex-1 border p-3 !border-n7 rounded-md  text-black w-full "
+            className="flex-1 p-3  rounded-md shadow-e2 text-black w-full 
+            focus:outline-none focus:ring-1 focus:ring-n3 border border-n2
+            "
             placeholder="Escribí un tema para investigar..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
           {category && (
             <div className="flex items-center gap-2 ">
-              <span className="inline-flex items-center gap-1 bg-n1  shadow-e1  text-n7 px-3 py-1 rounded-sm text-sm">
-                {category}
-                <button
-                  onClick={() => setCategory(null)}
-                  type="button"
-                  className="ml-1"
-                >
+              <button
+                onClick={() => setCategory(null)}
+                type="button"
+                className="ml-1"
+              >
+                <span className="inline-flex items-center gap-1 bg-p1 text-n0   shadow-e2  text-n7 px-3 py-2 rounded-sm text-sm">
+                  {category}
                   {CATEGORIES.find((cat) => cat.key === category)?.icon || null}
-                </button>
-              </span>
+                </span>
+              </button>
             </div>
           )}
         </div>

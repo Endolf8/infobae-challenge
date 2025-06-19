@@ -64,15 +64,15 @@ const Button = ({
 
   const variantStyles = secondary
     ? 'bg-[var(--colors-neutrals-n1)] text-[var(--colors-primary-p1)]'
-    : 'bg-p1 text-n0';
+    : '!bg-p1 text-n0';
 
   return (
     <button
       className={cn(
+        className,
         baseStyles,
         sizeStyles[sizeComponent],
-        variantStyles,
-        className
+        variantStyles
       )}
       onClick={handleAsyncClick}
       disabled={showLoading || disabled}

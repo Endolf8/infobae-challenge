@@ -34,11 +34,11 @@ const ResultList = ({
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full pb-8">
       <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[1fr]">
         {isLoading ? (
           <div className="col-span-full flex justify-center py-8">
-            <Loading />
+            <Loading title="Buscando resultados..." />
           </div>
         ) : shouldShowNoResults ? (
           <div className="col-span-full text-center h-full py-8 text-lg">
@@ -58,10 +58,7 @@ const ResultList = ({
 
       {results.noExpand && results.noExpand.length > 0 && (
         <div className="w-full my-4">
-          <button
-            onClick={handleToggle}
-            className="text-sm text-n7 hover:underline"
-          >
+          <button onClick={handleToggle} className="text-sm text-n10">
             {showNoExpand
               ? 'Ocultar menos relevantes ▲'
               : 'Mostrar menos relevantes ▼'}

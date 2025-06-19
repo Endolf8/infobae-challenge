@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
 
   if (exaResponse.status !== HTTP_STATUS.ok) {
     const err = await exaResponse.text();
+    // eslint-disable-next-line no-console
     console.error('Error de Exa:', err);
     return NextResponse.json(
       { error: 'Error desde Exa' },
