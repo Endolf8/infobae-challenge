@@ -1,5 +1,3 @@
-README.md
-
 # Infobae Challenge - Herramienta de Investigación con IA
 
 Este proyecto es una aplicación Next.js que integra el SDK de IA de Vercel con la API de Exa para proporcionar funcionalidades de investigación automatizada para creadores de contenido. La herramienta ayuda a los usuarios a iniciar investigaciones sobre temas específicos, categorizar resultados y generar contenido basado en esos hallazgos asistido por IA.
@@ -36,26 +34,26 @@ La aplicación se despliega automáticamente en Vercel y puede accederse en [htt
 
 1. Instalar dependencias:
 
-bash
+```bash
 npm install
-
 # o
-
 yarn install
+```
 
 2. Crear un archivo `.env.local` en el directorio raíz completando las siguientes variables:
 
+```
 EXA_API_KEY=exa_api_key
 OPENAI_API_KEY=openai_api_key
+```
 
 3. Ejecutar el servidor de desarrollo:
 
-bash
+```bash
 npm run dev
-
 # o
-
 yarn dev
+```
 
 4. Abrir [http://localhost:3000](http://localhost:3000) en tu navegador para ver la aplicación.
 
@@ -63,21 +61,19 @@ yarn dev
 
 Para compilar la aplicación para producción:
 
-bash
+```bash
 npm run build
-
 # o
-
 yarn build
+```
 
 Para iniciar el servidor de producción:
 
-bash
+```bash
 npm start
-
 # o
-
 yarn start
+```
 
 ## Stack Tecnológico
 
