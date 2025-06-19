@@ -8,12 +8,18 @@ Este proyecto es una aplicación Next.js que integra el SDK de IA de Vercel con 
 
 La aplicación se despliega automáticamente en Vercel y puede accederse en [https://infobae-challenge-iota.vercel.app](https://infobae-challenge-iota.vercel.app/).
 
+![landing](https://github.com/user-attachments/assets/7f34fb9d-a7ed-4d50-811c-8044c3454880)
+
 ## Funcionalidades
 
 1. **Página de Investigación**: Navegá a la página principal e ingresá una consulta de investigación personalizada en la barra de búsqueda. Elegí el tipo de investigación que deseas realizar para obtener resultados más relevantes.
+![search](https://github.com/user-attachments/assets/6b0ba816-024e-42fd-945e-ea1dd9ee2374)
+
 2. **Ver Resultados**: Examiná los resultados de investigación categorizados y elegí un tema que te interese. Podés leer el artículo original para chequear si vale la pena expandirlo.
 3. **Expandir Contenido**: Hacé clic en "Expandir" para cualquier tema que valga la pena para generar un borrador de artículo basado en los resultados de investigación. La herramienta generará un artículo inicial automáticamente utilizando la API de Exa y OpenAI.
 4. **Generación por URL/Imagen**: alternativamente también podés usar [el generador](https://infobae-challenge-iota.vercel.app) (haciendo click en el ícono de crear) para subir una imagen o URL de tu elección para generar un artículo basado en ese contenido.
+![editor](https://github.com/user-attachments/assets/bdca5af8-8255-4004-97a6-36983df46a27)
+
 5. **Generación de Títulos**: podés generar títulos para tu artículo utilizando la funcionalidad de generación de títulos. Podés elegir entre un número de títulos sugeridos y seleccionar el que más te guste o modificarlo según tus necesidades.
 6. **Editar Contenido**: usá el asistente de IA para editar el contenido generado, refinando el artículo según tus preferencias.
 7. **Exportar Artículo**: una vez que estés satisfecho con el artículo, podés exportarlo en formato PDF para compartirlo.
@@ -83,7 +89,7 @@ yarn start
 ## Mejoras Futuras
 
 - Implementar autenticación de usuarios para investigación personalizada
-- Añadir funcionalidad de guardado, exportación y publicación de resultados de investigación
 - Mejorar el algoritmo de categorización con criterios más personalizados
 - Añadir características colaborativas para creación de contenido en equipo
 - Implementar analíticas de contenido para rastrear el rendimiento de los artículos generados
+- Agregar una revisión con IA para detectar errores, inconsistencias o rastros de lenguaje artificial antes de publicar los artículos.
