@@ -64,7 +64,7 @@ const Button = ({
 
   const variantStyles = secondary
     ? 'bg-[var(--colors-neutrals-n1)] text-[var(--colors-primary-p1)]'
-    : 'bg-p1 text-n0';
+    : '!bg-p1 text-n0';
 
   return (
     <button

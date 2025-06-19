@@ -38,7 +38,7 @@ const CategoryDropdown: React.FC<Props> = ({ selected, onSelect }) => {
         type="button"
         className={cn(
           'flex items-center gap-2 px-3 py-1.5 rounded-sm  text-sm ',
-          selected ? 'bg-p1 text-n0' : 'bg-n2'
+          selected ? 'bg-p1 text-n0' : 'bg-n0 hover:bg-n1'
         )}
       >
         <Settings2 size={16} />
@@ -46,7 +46,7 @@ const CategoryDropdown: React.FC<Props> = ({ selected, onSelect }) => {
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-2 w-40 left-[-2rem] rounded-md bg-white shadow-lg ring-1 ring-black/5">
+        <div className="absolute z-50 mt-2 w-44 left-[-2rem] overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5">
           <div className="py-1">
             {CATEGORIES.map((cat) => {
               const isSelected = selected === cat.key;
@@ -57,8 +57,10 @@ const CategoryDropdown: React.FC<Props> = ({ selected, onSelect }) => {
                     onSelect(isSelected ? null : cat.key);
                     setOpen(false);
                   }}
-                  className={`flex items-center justify-between w-full px-4 py-2 text-sm hover:bg-gray-100 ${
-                    isSelected ? 'bg-blue-50 text-blue-600' : 'text-gray-800'
+                  className={`flex items-center justify-between w-full px-4 py-2 text-sm ${
+                    isSelected
+                      ? 'bg-p1 text-n0'
+                      : 'text-n10 hover:bg-p1-25 hover:text-n0'
                   }`}
                 >
                   <span className="flex items-center gap-2">

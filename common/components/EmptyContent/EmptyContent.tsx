@@ -1,4 +1,4 @@
-import iconStars from '@/public/assets/icon-starts.svg';
+import iconStars from '@/public/assets/icon-stars.svg';
 import Img from '../Img';
 
 interface Props {

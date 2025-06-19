@@ -1,10 +1,19 @@
 'use client';
-import ArticleServices from '@/common/services/ArticleServices';
+
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import ContentServices from '@/common/services/ContentServices';
 import { ExaContent } from '@/common/types';
+import ArticleServices from '@/common/services/ArticleServices';
+import TitleGenerator from '@/common/components/TitleGenerator';
+import MainSidebar from '@/common/components/MainSidebar';
+import ElementSidebar from '@/common/components/ElementSidebar';
 import { formatArticle } from '@/common/utils/formatArticle';
-import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { SIDEBAR_ELEMENTS } from '@/common/constants/generator';
+import { getTitle } from '@/common/utils/getTitle';
+import { getTextContent } from '@/common/utils/getTextContent';
+import EditorAssistantPanel from '@/common/components/EditorAssistantPanel/EditorAssistantPanel';
+import Loading from '@/common/components/Loading';
 
 const GeneratorView = () => {
   const searchParams = useSearchParams();
@@ -13,7 +22,36 @@ const GeneratorView = () => {
   const [generado, setGenerado] = useState('');
   const [customPrompt, setCustomPrompt] = useState('');
   const [history, setHistory] = useState<string[]>([]);
-  const [isComplete, setIsComplete] = useState(false);
+  const [elementSeletected, setElementSeletected] = useState('titles');
+
+  const modifyTitle = (generado: string, newTitle: string) => {
+    const titlePattern = '**Title:';
+    const subtitlePattern = '**Subtitle:';
+    const bodyPattern = '**Body:';
+
+    const lines = generado.split('\n').filter((line) => line.trim() !== '');
+
+    let title = newTitle; // Usamos el nuevo título proporcionado
+    let subtitle = '';
+    let body = '';
+
+    lines.forEach((line) => {
+      if (line.startsWith(titlePattern)) {
+        // Aquí estamos reemplazando el título original con el nuevo
+        title = newTitle;
+      } else if (line.startsWith(subtitlePattern)) {
+        subtitle = line.replace(subtitlePattern, '').replace('**', '').trim();
+      } else if (line.startsWith(bodyPattern)) {
+        body += line.replace(bodyPattern, '').replace('**', '').trim() + '\n';
+      } else {
+        body += line + '\n';
+      }
+    });
+
+    setGenerado(
+      `**Title:** ${title}\n**Subtitle:** ${subtitle}\n**Body:**\n${body}`
+    );
+  };
 
   const getContent = async () => {
     if (!url) return;
@@ -21,7 +59,7 @@ const GeneratorView = () => {
 
     const { ok, data } = await ContentServices.getContent(url);
     if (!ok || !data) {
-      ///TODO: Handle error case
+      // TODO: Manejar caso de error
       return;
     }
 
@@ -42,7 +80,6 @@ const GeneratorView = () => {
     text: string;
     history: string[];
   }) => {
-    setIsComplete(false);
     setGenerado('');
 
     const { ok, data } = await ArticleServices.requestStream({
@@ -52,6 +89,8 @@ const GeneratorView = () => {
     });
 
     if (!ok || !data) {
+      // TODO: Manejar error
+      return;
     }
 
     const reader = data.getReader();
@@ -63,18 +102,42 @@ const GeneratorView = () => {
       const chunk = decoder.decode(value, { stream: true });
       setGenerado((prev) => prev + chunk);
     }
-
-    setIsComplete(true);
   };
 
   const handlePromptSubmit = async () => {
-    if (!content || !customPrompt.trim()) return;
+    if (!generado || !customPrompt.trim()) return; // Asegurarse de que haya un texto generado y que el prompt no esté vacío
+
     const nuevaHistoria = [...history, customPrompt.trim()];
     setHistory(nuevaHistoria);
     setCustomPrompt('');
+
+    const titlePattern = '**Title:';
+    const subtitlePattern = '**Subtitle:';
+    const bodyPattern = '**Body:';
+
+    const lines = generado.split('\n').filter((line) => line.trim() !== '');
+
+    let title = '';
+    let body = '';
+    let subtitle = '';
+
+    lines.forEach((line) => {
+      if (line.startsWith(titlePattern)) {
+        title = line.replace(titlePattern, '').replace('**', '').trim();
+      } else if (line.startsWith(subtitlePattern)) {
+        subtitle = line.replace(subtitlePattern, '').replace('**', '').trim();
+      } else if (!line.startsWith(bodyPattern)) {
+        body += line + '\n';
+      }
+    });
+
+    body += '\n' + customPrompt.trim();
+
+    const nuevoTexto = `**Title:** ${title}\n**Subtitle:** ${subtitle}\n**Body:**\n${body}`;
+    console.log(nuevoTexto, nuevaHistoria);
     await handleGenerate({
-      title: content.title,
-      text: content.text,
+      title: title,
+      text: nuevoTexto,
       history: nuevaHistoria,
     });
   };
@@ -85,37 +148,73 @@ const GeneratorView = () => {
     }
   }, [url]);
 
-  return (
-    <main className="p-6 max-w-3xl mx-auto relative">
-      <h3 className="text-xl font-bold mb-4">
-        {new Date().toLocaleDateString('es-AR')}
-      </h3>
-      {generado && (
-        <article className="font-serif space-y-3">
-          {formatArticle(generado)}
-        </article>
-      )}
+  const handleTitleSelection = (title: string) => {
+    if (!content) return;
 
-      {generado && isComplete && (
-        <div className="fixed bottom-6 right-6 w-full max-w-md p-4 bg-white border shadow-xl rounded-lg z-50 animate__animated animate__slideInRight">
-          <label className="block mb-2 font-medium text-sm">
-            ¿Querés hacer un cambio?
-          </label>
-          <input
-            type="text"
-            placeholder="Ej: Redactalo en tono más informal"
-            className="w-full border px-3 py-2 rounded mb-2 text-sm"
-            value={customPrompt}
-            onChange={(e) => setCustomPrompt(e.target.value)}
+    const nuevaHistoria = [...history, title];
+    setHistory(nuevaHistoria);
+    setCustomPrompt('');
+    const newContentText =
+      generado.replace('**Title:**', `**Title:** ${title}`) +
+      '\n' +
+      customPrompt.trim();
+    setGenerado(newContentText);
+  };
+
+  const getElementSidebar = () => {
+    if (!content) return null;
+    switch (elementSeletected) {
+      case 'titles':
+        return (
+          <TitleGenerator
+            title={getTitle(generado)}
+            contentText={getTextContent(generado)}
+            handleSaveCustomTitle={(e) => modifyTitle(generado, e)}
           />
-          <button
-            onClick={handlePromptSubmit}
-            className="bg-black text-white text-sm px-4 py-2 rounded"
-          >
-            Reescribir con AI
-          </button>
-        </div>
-      )}
+        );
+      case 'editor':
+        return (
+          <EditorAssistantPanel
+            customPrompt={customPrompt}
+            history={history}
+            setCustomPrompt={setCustomPrompt}
+            handlePromptSubmit={handlePromptSubmit}
+          />
+        );
+
+      default:
+        return <div className="p-4">Selecciona una opción del menú</div>;
+    }
+  };
+
+  return (
+    <main className="flex w-screen h-screen relative overflow-hidden bg-n1">
+      <div className="flex">
+        <MainSidebar
+          elements={SIDEBAR_ELEMENTS}
+          onClickElement={(key) => {
+            setElementSeletected(key);
+          }}
+          elementSeletected={elementSeletected}
+        />
+        <ElementSidebar>{getElementSidebar()}</ElementSidebar>
+      </div>
+      <div className="  flex flex-col items-center mx-auto  pt-4 flex-1 ">
+        {generado ? (
+          <div className="bg-n0  p-6 max-w-3xl flex-1 rounded-t-md shadow-e1 overflow-y-auto">
+            <h3 className="text-xl font-bold mb-4">
+              {new Date().toLocaleDateString('es-AR')}
+            </h3>
+            {generado && (
+              <article className="font-serif space-y-3 ">
+                {formatArticle(generado)}
+              </article>
+            )}
+          </div>
+        ) : (
+          <Loading title="Redactando" />
+        )}
+      </div>
     </main>
   );
 };
