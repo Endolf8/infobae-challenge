@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ContentServices from '@/common/services/ContentServices';
@@ -9,11 +8,13 @@ import TitleGenerator from '@/common/components/TitleGenerator';
 import MainSidebar from '@/common/components/MainSidebar';
 import ElementSidebar from '@/common/components/ElementSidebar';
 import { formatArticle } from '@/common/utils/formatArticle';
-import { SIDEBAR_ELEMENTS } from '@/common/constants/generator';
+import { ElementsProps, SIDEBAR_ELEMENTS } from '@/common/constants/generator';
 import { getTitle } from '@/common/utils/getTitle';
 import { getTextContent } from '@/common/utils/getTextContent';
 import EditorAssistantPanel from '@/common/components/EditorAssistantPanel/EditorAssistantPanel';
 import Loading from '@/common/components/Loading';
+import Img from '@/common/components/Img';
+import infobaeLogo from '@/public/assets/Infobae-logo.svg';
 
 const GeneratorView = () => {
   const searchParams = useSearchParams();
@@ -22,7 +23,10 @@ const GeneratorView = () => {
   const [generado, setGenerado] = useState('');
   const [customPrompt, setCustomPrompt] = useState('');
   const [history, setHistory] = useState<string[]>([]);
-  const [elementSeletected, setElementSeletected] = useState('titles');
+  const [elementSeletected, setElementSeletected] = useState<ElementsProps>(
+    url ? 'titles' : 'sources'
+  );
+  const [generatedTitles, setGeneratedTitles] = useState<string[]>([]);
 
   const modifyTitle = (generado: string, newTitle: string) => {
     const titlePattern = '**Title:';
@@ -31,13 +35,12 @@ const GeneratorView = () => {
 
     const lines = generado.split('\n').filter((line) => line.trim() !== '');
 
-    let title = newTitle; // Usamos el nuevo título proporcionado
+    let title = newTitle;
     let subtitle = '';
     let body = '';
 
     lines.forEach((line) => {
       if (line.startsWith(titlePattern)) {
-        // Aquí estamos reemplazando el título original con el nuevo
         title = newTitle;
       } else if (line.startsWith(subtitlePattern)) {
         subtitle = line.replace(subtitlePattern, '').replace('**', '').trim();
@@ -81,7 +84,6 @@ const GeneratorView = () => {
     history: string[];
   }) => {
     setGenerado('');
-
     const { ok, data } = await ArticleServices.requestStream({
       title,
       text,
@@ -105,60 +107,21 @@ const GeneratorView = () => {
   };
 
   const handlePromptSubmit = async () => {
-    if (!generado || !customPrompt.trim()) return; // Asegurarse de que haya un texto generado y que el prompt no esté vacío
+    if (!generado || !customPrompt.trim()) return;
 
     const nuevaHistoria = [...history, customPrompt.trim()];
     setHistory(nuevaHistoria);
     setCustomPrompt('');
 
-    const titlePattern = '**Title:';
-    const subtitlePattern = '**Subtitle:';
-    const bodyPattern = '**Body:';
+    let title = getTitle(generado);
+    let body = getTextContent(generado);
 
-    const lines = generado.split('\n').filter((line) => line.trim() !== '');
-
-    let title = '';
-    let body = '';
-    let subtitle = '';
-
-    lines.forEach((line) => {
-      if (line.startsWith(titlePattern)) {
-        title = line.replace(titlePattern, '').replace('**', '').trim();
-      } else if (line.startsWith(subtitlePattern)) {
-        subtitle = line.replace(subtitlePattern, '').replace('**', '').trim();
-      } else if (!line.startsWith(bodyPattern)) {
-        body += line + '\n';
-      }
-    });
-
-    body += '\n' + customPrompt.trim();
-
-    const nuevoTexto = `**Title:** ${title}\n**Subtitle:** ${subtitle}\n**Body:**\n${body}`;
-    console.log(nuevoTexto, nuevaHistoria);
+    const nuevoTexto = `**Title:** ${title}\n**Body:**\n${body}`;
     await handleGenerate({
       title: title,
       text: nuevoTexto,
       history: nuevaHistoria,
     });
-  };
-
-  useEffect(() => {
-    if (url && !content) {
-      getContent();
-    }
-  }, [url]);
-
-  const handleTitleSelection = (title: string) => {
-    if (!content) return;
-
-    const nuevaHistoria = [...history, title];
-    setHistory(nuevaHistoria);
-    setCustomPrompt('');
-    const newContentText =
-      generado.replace('**Title:**', `**Title:** ${title}`) +
-      '\n' +
-      customPrompt.trim();
-    setGenerado(newContentText);
   };
 
   const getElementSidebar = () => {
@@ -169,6 +132,8 @@ const GeneratorView = () => {
           <TitleGenerator
             title={getTitle(generado)}
             contentText={getTextContent(generado)}
+            setGeneratedTitles={setGeneratedTitles}
+            generatedTitles={generatedTitles}
             handleSaveCustomTitle={(e) => modifyTitle(generado, e)}
           />
         );
@@ -187,11 +152,21 @@ const GeneratorView = () => {
     }
   };
 
+  useEffect(() => {
+    if (url && !content) {
+      getContent();
+    }
+  }, [url]);
+
   return (
     <main className="flex w-screen h-screen relative overflow-hidden bg-n1">
       <div className="flex">
         <MainSidebar
-          elements={SIDEBAR_ELEMENTS}
+          elements={
+            url
+              ? SIDEBAR_ELEMENTS.filter((e) => e.key !== 'sources')
+              : SIDEBAR_ELEMENTS
+          }
           onClickElement={(key) => {
             setElementSeletected(key);
           }}
@@ -201,10 +176,13 @@ const GeneratorView = () => {
       </div>
       <div className="  flex flex-col items-center mx-auto  pt-4 flex-1 ">
         {generado ? (
-          <div className="bg-n0  p-6 max-w-3xl flex-1 rounded-t-md shadow-e1 overflow-y-auto">
-            <h3 className="text-xl font-bold mb-4">
-              {new Date().toLocaleDateString('es-AR')}
-            </h3>
+          <div className="bg-n0  p-6 max-w-3xl gap-4  flex flex-col flex-1 rounded-t-md shadow-e1 overflow-y-auto">
+            <Img
+              src={infobaeLogo}
+              alt="Infobae Logo"
+              className="h-4 ml-[-5.5rem]"
+            />
+
             {generado && (
               <article className="font-serif space-y-3 ">
                 {formatArticle(generado)}

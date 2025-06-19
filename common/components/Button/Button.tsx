@@ -69,10 +69,10 @@ const Button = ({
   return (
     <button
       className={cn(
+        className,
         baseStyles,
         sizeStyles[sizeComponent],
-        variantStyles,
-        className
+        variantStyles
       )}
       onClick={handleAsyncClick}
       disabled={showLoading || disabled}

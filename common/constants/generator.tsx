@@ -5,7 +5,16 @@ import iconClipWhite from '@/public/assets/icon-clip-white.svg';
 import whiteStarIcon from '@/public/assets/icon-star-white.svg';
 import textIconWhite from '@/public/assets/icon-text-white.svg';
 
-export const SIDEBAR_ELEMENTS = [
+export type ElementsProps = 'sources' | 'titles' | 'editor';
+
+export interface SidebarElement {
+  title: string;
+  icon: string;
+  iconActive: string;
+  key: ElementsProps;
+}
+
+export const SIDEBAR_ELEMENTS: SidebarElement[] = [
   {
     title: 'Fuentes',
     icon: iconClip,

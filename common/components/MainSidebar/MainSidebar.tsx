@@ -1,17 +1,12 @@
 import React from 'react';
 import Img from '../Img';
 import cn from '@/common/utils/classNames';
-import { StaticImport } from 'next/dist/shared/lib/get-img-props';
+import { ElementsProps, SidebarElement } from '@/common/constants/generator';
 
 interface MainSidebarProps {
   elementSeletected: string | null;
-  elements: {
-    title: string;
-    icon: string | StaticImport;
-    iconActive: string | StaticImport;
-    key: string;
-  }[];
-  onClickElement: (key: string) => void;
+  elements: SidebarElement[];
+  onClickElement: (key: ElementsProps) => void;
 }
 
 const MainSidebar = ({

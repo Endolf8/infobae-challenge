@@ -20,7 +20,7 @@ const EditorAssistantPanel = ({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {history.map((msg, index) => (
           <div key={index} className="flex relative w-full justify-end">
-            <div className="relative bg-n0  border border-p1 text-n4  text-sm px-4 py-2 w-full rounded-lg ">
+            <div className="relative bg-n0  border border-p1 text-n4  text-sm px-4 py-2 w-full rounded-md ">
               {msg}
             </div>
           </div>

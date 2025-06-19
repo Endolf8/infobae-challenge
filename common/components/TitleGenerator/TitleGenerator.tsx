@@ -10,17 +10,20 @@ import { Star, StarHalf, StarIcon, SunDim } from 'lucide-react';
 interface TitleGeneratorProps {
   contentText: string;
   title: string;
+  generatedTitles: string[];
   handleSaveCustomTitle: (title: string) => void;
+  setGeneratedTitles: (titles: string[]) => void;
 }
 
 const TitleGenerator = ({
   contentText,
   title,
+  generatedTitles,
+  setGeneratedTitles,
   handleSaveCustomTitle,
 }: TitleGeneratorProps) => {
   const [titleCount, setTitleCount] = useState<number | null>(3);
   const [customTitle, setCustomTitle] = useState<string>('');
-  const [generatedTitles, setGeneratedTitles] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
 
   const generateTitles = async () => {
@@ -91,21 +94,18 @@ const TitleGenerator = ({
         </div>
       </div>
 
-      {/* Títulos Generados */}
       <div className="flex-1 overflow-y-auto p-4 ">
         {generatedTitles.length > 0 && !isGenerating && (
-          <h3 className=" font-medium text-gray-800 mb-2">
-            Títulos Generados:
-          </h3>
+          <h3 className="font-medium text-n4 mb-2">Títulos Generados:</h3>
         )}
         <ul className="space-y-2">
-          {generatedTitles.map((title, index) => (
+          {generatedTitles.map((t, index) => (
             <li key={index}>
               <button
                 onClick={() => setCustomTitle(title)}
-                className="w-full flex text-left text-sm  hover:text-p1 "
+                className="w-full flex text-left text-sm  gap-2 hover:text-p1 "
               >
-                <SunDim className="h-6 w-6" />
+                <SunDim className={'h-7 w-7'} />
                 {title}
               </button>
             </li>
@@ -131,7 +131,7 @@ const TitleGenerator = ({
           <Button
             handleClick={() => handleSaveCustomTitle(customTitle)}
             label="Guardar"
-            className="!w-fit !bg-n0 text-p1"
+            className="!w-fit !bg-white !text-p1 shadow-e2"
           />
         </div>
       </div>

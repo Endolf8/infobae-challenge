@@ -7,6 +7,7 @@ import SearchServices from '@/common/services/SearchServices';
 import { CategoryType, ExaSearchResult } from '@/common/types';
 import infobaeLogo from '@/public/assets/Infobae-logo.svg';
 import { NotebookPen } from 'lucide-react';
+import ButtonCreate from '@/common/components/ButtonCreate';
 
 const HomeView = () => {
   const [query, setQuery] = useState('');
@@ -99,8 +100,8 @@ const HomeView = () => {
         </div>
       </div>
 
-      <div className="fixed text-p1 bottom-4 right-4 cursor-pointer rounded-full flex items-center justify-center bg-n0 h-28 w-28 animate__animated animate__zoomIn shadow-e4">
-        <NotebookPen className="h-16 w-16" />
+      <div className="fixed  bottom-4 right-4">
+        <ButtonCreate />
       </div>
     </div>
   );
