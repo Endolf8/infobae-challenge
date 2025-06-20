@@ -1,21 +1,48 @@
 import React, { useState } from 'react';
 import InputImage from '../InputImage';
 import Input from '../Input';
-import { set } from 'zod';
+import { toast } from 'sonner';
+import ArticleServices from '@/common/services/ArticleServices';
 
 interface SourcesSelectedProps {
+  setGeneratedContent: (content: string | ((prev: string) => string)) => void;
   getContent: (url: string) => Promise<void>;
-  handleGenerateFromImage: (image: File) => void;
+  setIsLoading: (loading: boolean) => void;
   isLoading: boolean;
 }
 
 const SourcesSelector = ({
-  handleGenerateFromImage,
   getContent,
+  setGeneratedContent,
+  setIsLoading,
   isLoading,
 }: SourcesSelectedProps) => {
   const [isDisabled, setIsDisabled] = useState(false);
   const [url, setUrl] = useState<string>('');
+
+  const handleGenerateFromImage = async (image: File) => {
+    setGeneratedContent('');
+    setIsLoading(true);
+
+    const { ok, data } = await ArticleServices.requestStreamFromImage(image);
+    setIsLoading(false);
+
+    if (!ok || !data) {
+      toast.error('Ocurrío un error inténtalo de nuevo más tarde.');
+      setIsLoading(false);
+      return;
+    }
+
+    const reader = data.getReader();
+    const decoder = new TextDecoder('utf-8');
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      setGeneratedContent((prev: string) => prev + chunk);
+    }
+  };
 
   const isValidUrl = (url: string) => {
     try {
@@ -33,7 +60,7 @@ const SourcesSelector = ({
     if (isValidUrl(url)) {
       await getContent(url);
     } else {
-      alert('URL no válida');
+      toast.error('Por favor, proporciona una URL válida.');
     }
     setIsDisabled(false);
   };

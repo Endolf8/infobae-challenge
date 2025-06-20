@@ -1,17 +1,21 @@
-import '@/styles/globals.css';
 import '@/styles/variables.css';
 import 'animate.css';
-import { ReactNode } from 'react';
+import '@/styles/globals.css';
+import Toast from '@/common/components/Toast';
 
-export const metadata = {
-  title: 'AI Research App',
-  description: 'Investigación asistida por inteligencia artificial',
-};
+export const metadata = { title: '...', description: '...' };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body>
+        <Toast />
+        {children}
+      </body>
     </html>
   );
 }

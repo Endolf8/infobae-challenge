@@ -1,6 +1,6 @@
 import { Result } from './types';
 
-interface GenerateInput {
+export interface GenerateInput {
   title: string;
   text: string;
   history: string[];

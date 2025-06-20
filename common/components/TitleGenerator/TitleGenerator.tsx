@@ -5,6 +5,7 @@ import Img from '../Img';
 import starWhiteIcon from '@/public/assets/icon-star-white.svg';
 import cn from '@/common/utils/classNames';
 import { SunDim } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface TitleGeneratorProps {
   contentText: string;
@@ -27,9 +28,10 @@ const TitleGenerator = ({
 
   const generateTitles = async () => {
     if (!contentText || (titleCount && titleCount < 1) || !titleCount) {
-      alert(
+      toast.error(
         'Por favor, proporciona el texto del contenido y una cantidad válida de títulos.'
       );
+
       return;
     }
     setGeneratedTitles([]);

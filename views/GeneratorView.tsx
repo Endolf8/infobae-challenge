@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ContentServices from '@/common/services/ContentServices';
 import { ExaContent } from '@/common/types';
-import ArticleServices from '@/common/services/ArticleServices';
+import ArticleServices, {
+  GenerateInput,
+} from '@/common/services/ArticleServices';
 import TitleGenerator from '@/common/components/TitleGenerator';
 import MainSidebar from '@/common/components/MainSidebar';
 import ElementSidebar from '@/common/components/ElementSidebar';
@@ -16,8 +18,9 @@ import Loading from '@/common/components/Loading';
 import Img from '@/common/components/Img';
 import { modifyTitle } from '@/common/utils/modifyTitle';
 import SourcesSelector from '@/common/components/SourcesSelector';
-import { getArticleHtml } from '@/common/utils/getArticleHtml';
 import infobaeLogo from '@/public/assets/Infobae-logo.svg';
+import { toast } from 'sonner';
+import handleDownloadPDF from '@/common/utils/handleDownloadPDF';
 
 const GeneratorView = () => {
   const searchParams = useSearchParams();
@@ -33,15 +36,16 @@ const GeneratorView = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const getContent = async (url: string) => {
-    if (!url) return;
-    setContent(null);
-
-    const { ok, data } = await ContentServices.getContent(url);
-    if (!ok || !data) {
-      // TODO: Manejar caso de error
+    if (!url) {
+      toast.error('Por favor, proporciona una URL válida.');
       return;
     }
-
+    setContent(null);
+    const { ok, data } = await ContentServices.getContent(url);
+    if (!ok || !data) {
+      toast.error('Ocurrío un error inténtalo de nuevo más tarde.');
+      return;
+    }
     setContent(data);
     await handleGenerate({
       title: data.title,
@@ -54,11 +58,7 @@ const GeneratorView = () => {
     title,
     text,
     history = [],
-  }: {
-    title: string;
-    text: string;
-    history: string[];
-  }) => {
+  }: GenerateInput) => {
     setGeneratedContent('');
     setIsLoading(true);
 
@@ -69,7 +69,8 @@ const GeneratorView = () => {
     });
 
     if (!ok || !data) {
-      // TODO: Manejar error
+      toast.error('Ocurrío un error inténtalo de nuevo más tarde.');
+      setIsLoading(false);
       return;
     }
 
@@ -95,35 +96,12 @@ const GeneratorView = () => {
     let title = getTitle(generatedContent);
     let body = getTextContent(generatedContent);
 
-    const nuevoTexto = `**Title:** ${title}\n**Body:**\n${body}`;
+    const newText = `**Title:** ${title}\n**Body:**\n${body}`;
     await handleGenerate({
       title: title,
-      text: nuevoTexto,
+      text: newText,
       history: newHistory,
     });
-  };
-
-  const handleGenerateFromImage = async (image: File) => {
-    setGeneratedContent('');
-    setIsLoading(true);
-
-    const { ok, data } = await ArticleServices.requestStreamFromImage(image);
-    setIsLoading(false);
-
-    if (!ok || !data) {
-      // TODO: Manejar error
-      return;
-    }
-
-    const reader = data.getReader();
-    const decoder = new TextDecoder('utf-8');
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-      setGeneratedContent((prev) => prev + chunk);
-    }
   };
 
   const getElementSidebar = () => {
@@ -131,9 +109,10 @@ const GeneratorView = () => {
       case 'sources':
         return (
           <SourcesSelector
-            handleGenerateFromImage={handleGenerateFromImage}
             isLoading={isLoading}
             getContent={getContent}
+            setGeneratedContent={setGeneratedContent}
+            setIsLoading={setIsLoading}
           />
         );
       case 'titles':
@@ -169,25 +148,6 @@ const GeneratorView = () => {
     }
   }, [url]);
 
-  const handleDownloadPDF = async () => {
-    const htmlContent = getArticleHtml(generatedContent);
-
-    const container = document.createElement('div');
-    container.innerHTML = htmlContent;
-
-    const html2pdf = (await import('html2pdf.js')).default;
-    html2pdf()
-      .from(container)
-      .set({
-        margin: 10,
-        filename: 'articulo-generado.pdf',
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'] },
-      })
-      .save();
-  };
-
   return (
     <main className="flex w-screen h-screen relative overflow-hidden bg-n1">
       <div className="flex">
@@ -206,9 +166,9 @@ const GeneratorView = () => {
         <ElementSidebar>{getElementSidebar()}</ElementSidebar>
       </div>
       <div className="  flex flex-col items-center mx-auto  pt-4 flex-1 ">
-        {generatedContent && (
+        {generatedContent && !isLoading && (
           <button
-            onClick={handleDownloadPDF}
+            onClick={() => handleDownloadPDF(generatedContent)}
             className="px-4 py-2 !bg-p1 text-n10 absolute bottom-6 right-6 z-modal rounded hover:bg-n8 shadow-e3"
           >
             Descargar como PDF
@@ -228,7 +188,7 @@ const GeneratorView = () => {
               </article>
             )}
           </div>
-        ) : !url ? (
+        ) : !url && !isLoading ? (
           <div className="flex items-center justify-center flex-col flex-1">
             <Img src={infobaeLogo} alt="Infobae Logo" className="h-36" />
             <p className="text-h4 text-n10 text-center">
