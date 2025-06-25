@@ -3,7 +3,7 @@ import 'animate.css';
 import '@/styles/globals.css';
 import Toast from '@/common/components/Toast';
 
-export const metadata = { title: '...', description: '...' };
+export const metadata = { title: 'Infobae', description: 'Asistente de notas' };
 
 export default function RootLayout({
   children,
