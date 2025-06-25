@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ContentServices from '@/common/services/ContentServices';
 import { ExaContent } from '@/common/types';
@@ -35,6 +35,9 @@ const GeneratorView = () => {
   const [generatedTitles, setGeneratedTitles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const contentRef = useRef('');
+  const animationFrameRef = useRef<number | null>(null);
+
   const getContent = async (url: string) => {
     if (!url) {
       toast.error('Por favor, proporciona una URL válida.');
@@ -59,6 +62,7 @@ const GeneratorView = () => {
     text,
     history = [],
   }: GenerateInput) => {
+    contentRef.current = '';
     setGeneratedContent('');
     setIsLoading(true);
 
@@ -77,13 +81,28 @@ const GeneratorView = () => {
     const reader = data.getReader();
     const decoder = new TextDecoder('utf-8');
 
-    while (true) {
+    const readChunk = async () => {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        setGeneratedContent(contentRef.current);
+        setIsLoading(false);
+        return;
+      }
+
       const chunk = decoder.decode(value, { stream: true });
-      setGeneratedContent((prev) => prev + chunk);
-    }
-    setIsLoading(false);
+      contentRef.current += chunk;
+
+      if (!animationFrameRef.current) {
+        animationFrameRef.current = requestAnimationFrame(() => {
+          setGeneratedContent(contentRef.current);
+          animationFrameRef.current = null;
+        });
+      }
+
+      readChunk();
+    };
+
+    readChunk();
   };
 
   const handlePromptSubmit = async () => {
@@ -93,8 +112,8 @@ const GeneratorView = () => {
     setHistory(newHistory);
     setCustomPrompt('');
 
-    let title = getTitle(generatedContent);
-    let body = getTextContent(generatedContent);
+    const title = getTitle(generatedContent);
+    const body = getTextContent(generatedContent);
 
     const newText = `**Title:** ${title}\n**Body:**\n${body}`;
     await handleGenerate({
@@ -165,7 +184,7 @@ const GeneratorView = () => {
         />
         <ElementSidebar>{getElementSidebar()}</ElementSidebar>
       </div>
-      <div className="  flex flex-col items-center mx-auto  pt-4 flex-1 ">
+      <div className="flex flex-col items-center mx-auto pt-4 flex-1">
         {generatedContent && !isLoading && (
           <button
             onClick={() => handleDownloadPDF(generatedContent)}
@@ -175,18 +194,15 @@ const GeneratorView = () => {
           </button>
         )}
         {generatedContent ? (
-          <div className="bg-n0  p-6 max-w-3xl gap-4  flex flex-col flex-1 rounded-t-md shadow-e1 overflow-y-auto">
+          <div className="bg-n0 p-6 max-w-3xl gap-4 flex flex-col flex-1 rounded-t-md shadow-e1 overflow-y-auto">
             <Img
               src={infobaeLogo}
               alt="Infobae Logo"
               className="h-4 ml-[-5.5rem]"
             />
-
-            {generatedContent && (
-              <article className="font-serif space-y-3">
-                {formatArticle(generatedContent)}
-              </article>
-            )}
+            <article className="font-serif space-y-3">
+              {formatArticle(generatedContent)}
+            </article>
           </div>
         ) : !url && !isLoading ? (
           <div className="flex items-center justify-center flex-col flex-1">

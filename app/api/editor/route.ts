@@ -78,6 +78,7 @@ export async function POST(req: Request) {
     return new Response(result.textStream, {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
+        
       },
     });
   } catch (err: any) {
